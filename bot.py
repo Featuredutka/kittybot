@@ -1,6 +1,7 @@
 import os
 import json
 import glob
+import time
 import vk_api
 import random
 import requests
@@ -18,6 +19,7 @@ class Kitty_Bot:
     vk_session = ""
     active_sess = ""
     cute_cats_url = ""
+    lucky_times = []
 
     def __init__(self):
         config_file = open('/Users/ash/Desktop/kittybot/config.json')
@@ -32,11 +34,19 @@ class Kitty_Bot:
         self.vk_session = vk_api.VkApi(token=self.token)
         self.longpoll = VkBotLongPoll(self.vk_session, self.group_id)
         self.active_sess = self.vk_session.get_api()
+        # self.arrange_post_hours()
 
     def get_random_int(self) -> int:
         curr_dt = datetime.now()
         timestamp = int(round(curr_dt.timestamp()))
         return timestamp
+    
+    # def arrange_post_hours(self) -> list:
+    #     self.lucky_times.clear()
+    #     for _ in range(10):
+    #         self.lucky_time.append([random.randint(11, 20), random.randint(0, 59)])
+    #     self.lucky_times.sort()
+    #     return self.lucky_time
 
     def send_message(self, id, message):
         self.vk_session.method('messages.send', {'chat_id':id, 'message':message, 'random_id':get_random_id()})
