@@ -27,4 +27,4 @@ A simple bot for sending cat pictures to work chats made with VK API
 - [ ]  **Automatic posting (time-tied) - checking current time**
     - [ ]  Two async loops
         - [ ]  1 - longpoll listener
-        - [ ]  2 - time checker for posting on time
+        - [ ]  2 - time check procedure for posting within active time periods
