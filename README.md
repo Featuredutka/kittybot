@@ -1,5 +1,5 @@
 # kittybot
-A simple bot for sending cat pictures to work chats made with VK API
+A bot for sending cat pictures to work chats made with VK API
 
 <aside>
 💡 **v.1.0**
