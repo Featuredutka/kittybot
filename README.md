@@ -1,30 +1,27 @@
 # kittybot
-A simple bot for sending cat pictures to work chats made with VK API
+A bot for sending cat pictures to work chats made with VK API
 
-<aside>
-💡 **v.1.0**
-
-</aside>
+💡 ***v.1.1***
 
 - [x]  Parse web for cats
-- [x]  Send cats
-- [x]  Send messages to chats with VK API
-- [x]  Random ints generation tied to timeline for unique message ids
+- [x]  Send cats to chats
+- [x]  Random ints generation tied to timeline for VK API
+- [x]  Exceptions for empty images
+- [x]  Different replies
+- [x]  Enriched manual responses dictionary
+- [x]  Check repeating images and send only new ones
+- [x]  Keyboard interruptions made beautiful
 
-<aside>
-💡 **v.1.1**
-
-</aside>
+💡 ***v.1.2 - WIP***
 
 - [ ]  Greetings and farewells
-- [ ]  Exceptions for empty files
-- [ ]  Check repeating images (hash?) and send only new ones **(MD5?)**
-- [ ]  **README with instructions**
-- [ ]  Get acquainted with the VK pipeline and comment it in code
+- [ ]  **README with instructions how to use it**
+- [ ]  Get acquainted with the vk pipeline and comment it in code
 - [ ]  Transfer project to Raspberry server and let it work in a loop
-- [ ]  Different replies (dictionary)
-- [ ]  Different animals
+- [ ]  Different animals posting
 - [ ]  **Automatic posting (time-tied) - checking current time**
-    - [ ]  Two async loops
+    - [ ]  Two async loops (?)
         - [ ]  1 - longpoll listener
         - [ ]  2 - time checker for posting on time
+- [ ]  Parse VK cat groups for cats as well
+- [ ]  Bot throws exception on long waits **NOT CONFIRMED**
