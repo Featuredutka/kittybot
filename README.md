@@ -1,10 +1,7 @@
 # kittybot
 A bot for sending cat pictures to work chats made with VK API
 
-<aside>
-💡 **v.1.1**
-
-</aside>
+💡 ***v.1.1***
 
 - [x]  Parse web for cats
 - [x]  Send cats to chats
@@ -15,10 +12,7 @@ A bot for sending cat pictures to work chats made with VK API
 - [x]  Check repeating images and send only new ones
 - [x]  Keyboard interruptions made beautiful
 
-<aside>
-💡 **v.1.2**
-
-</aside>
+💡 ***v.1.2 - WIP***
 
 - [ ]  Greetings and farewells
 - [ ]  **README with instructions how to use it**
