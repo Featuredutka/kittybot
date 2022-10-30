@@ -22,14 +22,10 @@ def get_image_hash(imagename:str)-> str:
 def search_for_duplicate(image_hash:str, cursor)-> int:
 # CREATE TABLE imhashes (id SERIAL PRIMARY KEY , hash VARCHAR(40) UNIQUE NOT NULL); - table structure 
     try:
-        # cursor = CONNECTION.cursor()
-        # print("PostgreSQL server information")
-        # print(CONNECTION.get_dsn_parameters(), "\n")
         cursor.execute(f"SELECT * FROM {TABLE_NAME} where hash like '{image_hash}';")
         record = cursor.fetchone()
 
         if record:  # Image hash in database means this image was already posted
-            # print("Image already posted")
             return None
         else:  # No image found - post it and add it's hash to the database
             print("No image found")
@@ -38,6 +34,3 @@ def search_for_duplicate(image_hash:str, cursor)-> int:
 
     except (Exception, Error) as error:
         print("Error while connecting to PostgreSQL", error)
-        # if (CONNECTION):
-            # cursor.close()
-            # CONNECTION.close()

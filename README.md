@@ -12,16 +12,20 @@ A bot for sending cat pictures to work chats made with VK API
 - [x]  Check repeating images and send only new ones
 - [x]  Keyboard interruptions made beautiful
 
-💡 ***v.1.2 - WIP***
+💡 ***v.1.2***
+
+- [x]  Get acquainted with the vk pipeline and comment it in code
+- [x]  Scheduled posting alongside with posting by requests in two different processes
+- [x]  Clean up the code
+- [x]  Changed absolute paths to relative for ease of transfer
+- [x]  Docker testing the app
+- [x]  Multiple sources available
+
+💡 ***v.1.3 - WIP***
 
 - [ ]  Greetings and farewells
-- [ ]  **README with instructions how to use it**
-- [ ]  Get acquainted with the vk pipeline and comment it in code
-- [ ]  Transfer project to Raspberry server and let it work in a loop
 - [ ]  Different animals posting
-- [ ]  **Automatic posting (time-tied) - checking current time**
-    - [ ]  Two async loops (?)
-        - [ ]  1 - longpoll listener
-        - [ ]  2 - time checker for posting on time
 - [ ]  Parse VK cat groups for cats as well
-- [ ]  Bot throws exception on long waits **NOT CONFIRMED**
+- [ ]  Neural-generated cats
+- [ ]  Neural-confirmed cats
+- [ ]  Dockerize the app

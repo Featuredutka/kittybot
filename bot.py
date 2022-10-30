@@ -6,14 +6,14 @@ import vk_api
 import random
 import requests
 import psycopg2
+import multiprocessing as mps
 import origtest as orig
 from bs4 import BeautifulSoup
 from datetime import datetime
 from vk_api.utils import get_random_id
 from vk_api.bot_longpoll import VkBotLongPoll, VkBotEventType
 
-
-IMAGE_PATH = "/Users/ash/Desktop/kittybot/images/test.png"
+IMAGE_PATH = "./images/test.png"
 # IMAGE_PATH = "/Users/ash/Desktop/test.png"  # DEBUGGING EMPTY PICTURE
 
 CONNECTION = psycopg2.connect(user="newuser",
@@ -23,7 +23,6 @@ CONNECTION = psycopg2.connect(user="newuser",
                                   database="hashes")
 
 
-
 class Kitty_Bot:
 
     token = ""
@@ -31,15 +30,13 @@ class Kitty_Bot:
     longpoll = ""
     vk_session = ""
     active_sess = ""
-    cute_cats_url = ""
-
-    # lucky_times = [] # not used so far
+    cute_cats_url = []
 
     manual_responses = []
     auto_responses = []
 
     def __init__(self):
-        config_file = open('/Users/ash/Desktop/kittybot/config.json')  # Loading configurations for VK Auth
+        config_file = open('config.json')  # Loading configurations for VK Auth
         data = json.load(config_file)
 
         self.token = data['vk_secret_token']
@@ -51,9 +48,8 @@ class Kitty_Bot:
         self.vk_session = vk_api.VkApi(token=self.token)
         self.longpoll = VkBotLongPoll(self.vk_session, self.group_id)
         self.active_sess = self.vk_session.get_api()
-        # self.arrange_post_hours()
 
-        dictionary = open('/Users/ash/Desktop/kittybot/dictionary.json')    # Loading response phrases
+        dictionary = open('dictionary.json')    # Loading response phrases
         data = json.load(dictionary)
 
         self.manual_responses = data['manual_responses']
@@ -61,7 +57,7 @@ class Kitty_Bot:
 
         dictionary.close()
 
-        print("Bot is ACTIVE")
+        print("Bot is ACTIVE --- ", end="")
     
     def __del__(self):
         print("Bot is STOPPED")
@@ -70,23 +66,17 @@ class Kitty_Bot:
         curr_dt = datetime.now()
         timestamp = int(round(curr_dt.timestamp()))
         return timestamp
-    
-    # def arrange_post_hours(self) -> list:
-    #     self.lucky_times.clear()
-    #     for _ in range(10):
-    #         self.lucky_time.append([random.randint(11, 20), random.randint(0, 59)])
-    #     self.lucky_times.sort()
-    #     return self.lucky_time
 
     def send_message(self, id, message):
         self.vk_session.method('messages.send', {'chat_id':id, 'message':message, 'random_id':get_random_id()})
     
     def find_picture(self):
-        old_files = glob.glob("/Users/ash/Desktop/kittybot/images/*")  # Clean directory for a new pic
+        old_files = glob.glob("./images/*")  # Clean directory for a new pic
         for file in old_files:
             os.remove(file)
 
-        getURL = requests.get(self.cute_cats_url, headers={"User-Agent":"Mozilla/5.0"})  # Scrape url for pics
+        current_source = self.cute_cats_url[random.randint(0, len(self.cute_cats_url)-1)] 
+        getURL = requests.get(current_source, headers={"User-Agent":"Mozilla/5.0"})  # Scrape url for pics
         soup = BeautifulSoup(getURL.text, 'html.parser')
         
         images = soup.find_all('img')
@@ -94,7 +84,7 @@ class Kitty_Bot:
 
         for image in images:
             src = image.get('src')
-            resolvedURLs.append(requests.compat.urljoin(self.cute_cats_url, src))
+            resolvedURLs.append(requests.compat.urljoin(current_source, src))
 
         lucky_number = random.randint(0,len(resolvedURLs)-1)  # We need to post only one random cat
 
@@ -104,19 +94,20 @@ class Kitty_Bot:
             im.close()
 
 
-    def send_picture(self, photo_address=IMAGE_PATH):
+    def send_picture(self, id, response, photo_address=IMAGE_PATH):
         # self.vk_session.method("messages.send", {'chat_id':id, "message": "Вот вам кощька:(пока только эта)", "attachment": "photo258009994_457267819", 'random_id':self.random_id})
         messages_upload_server = self.vk_session.method("photos.getMessagesUploadServer")
         photo_upload_data = requests.post(messages_upload_server['upload_url'], files={'photo': open(photo_address, 'rb')}).json()
         saved_photo = self.vk_session.method('photos.saveMessagesPhoto', {'photo': photo_upload_data['photo'], 'server': photo_upload_data['server'], 'hash': photo_upload_data['hash']})[0]
         attachment = "photo{}_{}".format(saved_photo["owner_id"], saved_photo["id"])
-        self.vk_session.method("messages.send", {'chat_id':id, "message": self.manual_responses[random.randint(0, 4)], "attachment": attachment, "random_id": get_random_id()})
+        self.vk_session.method("messages.send", {'chat_id':id, "message": response[random.randint(0, len(response)-1)], "attachment": attachment, "random_id": get_random_id()})
 
-if __name__ == "__main__":
+def main_bot_loop():
     try:
         cursor = CONNECTION.cursor()  # Connecting to the database
 
         bot = Kitty_Bot()
+        print(main_bot_loop.__name__)
         
         for event in bot.longpoll.listen():
             if event.type == VkBotEventType.MESSAGE_NEW:
@@ -131,18 +122,55 @@ if __name__ == "__main__":
                             bot.find_picture()
                         while orig.search_for_duplicate(orig.get_image_hash(IMAGE_PATH), cursor) == None: # Preventing duplicate images from being sent
                             bot.find_picture()
-                        bot.send_picture() 
+                        bot.send_picture(id, bot.manual_responses) 
                         CONNECTION.commit()
-                    
 
-            # #TODO Add information displaying as well as greeting and goodbye messages (IS IT EVEN POSSIBLE?)
-            # elif event.type == VkBotEventType.GROUP_JOIN:
-            #     if event.from_chat:
-            #         id = event.chat_id
-            #         bot.send_message(id, "Я - Кошкобот\nПриносить кощек в чаты - моя задача\nЧтобы попросить у меня кощьку - просто напиши мне что-нибудь")
-            #     print("lol")
-
-            # elif event.type == VkBotEventType.GROUP_LEAVE:
-            #         bot.send_message()
     except KeyboardInterrupt:
-        print("You interrupted the work manually")
+        print("\nYou interrupted the work manually")
+
+def get_time() -> list:
+    lucky_times = []
+    for _ in range(10):
+        lucky_times.append([random.randint(11, 20), random.randint(0, 59)])
+    lucky_times.sort()
+    print("Posting time - ", end=" ")
+    for _ in lucky_times:
+        print(str(_[0]) + ":" + str(_[1]), end=" ")
+    print("")
+    return lucky_times
+
+def autonomous_bot_loop():  
+    times = get_time()
+    bot = Kitty_Bot()
+    print(autonomous_bot_loop.__name__)
+    while True:
+        currentDateAndTime = datetime.now()
+        currentTime = [currentDateAndTime.hour, currentDateAndTime.minute]
+        for thing in times:
+            if currentTime[0] == thing[0] and currentTime[1] == thing[1]:
+                id = 1  # TODO For every chat - do a post based on the id (or just tie it to one single chat which is a shitty idea)
+                cursor = CONNECTION.cursor()
+                bot.find_picture()
+                while os.stat(IMAGE_PATH).st_size < 1000:  # Preventing empty images from being sent (empty size usually is 919 bytes but further research is needed)
+                    bot.find_picture()
+                while orig.search_for_duplicate(orig.get_image_hash(IMAGE_PATH), cursor) == None: # Preventing duplicate images from being sent
+                    bot.find_picture()
+                bot.send_picture(id, bot.auto_responses) 
+                CONNECTION.commit()
+                times.pop(0)  # Delete the first element from array (pop da stack) TODO - maybe use a stack instead of the list
+        if currentTime[0] == 9 and currentTime[1] == 0:
+            times = get_time()
+        time.sleep(60)
+
+
+if __name__ == "__main__":
+    proc_list = []
+    request_loop = mps.Process(target=main_bot_loop)
+    auto_loop = mps.Process(target=autonomous_bot_loop)
+    proc_list.append(request_loop)
+    proc_list.append(auto_loop)
+    request_loop.start()
+    auto_loop.start()
+    request_loop.join()
+    auto_loop.join()
+    
