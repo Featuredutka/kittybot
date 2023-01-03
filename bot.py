@@ -26,7 +26,7 @@ CONNECTION = psycopg2.connect(user="newuser",
 class Kitty_Bot:
 
     token = ""
-    group_id = 0
+    group_id = 2
     longpoll = ""
     vk_session = ""
     active_sess = ""
@@ -148,7 +148,7 @@ def autonomous_bot_loop():
         currentTime = [currentDateAndTime.hour, currentDateAndTime.minute]
         for thing in times:
             if currentTime[0] == thing[0] and currentTime[1] == thing[1]:
-                id = 1  # TODO For every chat - do a post based on the id (or just tie it to one single chat which is a shitty idea)
+                id = 2  # TODO For every chat - do a post based on the id (or just tie it to one single chat which is a shitty idea)
                 cursor = CONNECTION.cursor()
                 bot.find_picture()
                 while os.stat(IMAGE_PATH).st_size < 1000:  # Preventing empty images from being sent (empty size usually is 919 bytes but further research is needed)
