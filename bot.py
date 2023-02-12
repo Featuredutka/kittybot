@@ -20,7 +20,7 @@ def reconnect():
     CONNECTION = psycopg2.connect(user="hashes",
                                     password="password",
                                     host="localhost",
-                                    port="5432",
+                                    port="5431",
                                     database="hashes")
     return CONNECTION
 
