@@ -19,7 +19,7 @@ IMAGE_PATH = "./images/test.png"
 def reconnect():
     CONNECTION = psycopg2.connect(user="hashes",
                                     password="password",
-                                    host="localhost",
+                                    host="0.0.0.0",
                                     port="5432",
                                     database="hashes")
     return CONNECTION
