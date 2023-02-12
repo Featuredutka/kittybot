@@ -16,11 +16,13 @@ from vk_api.bot_longpoll import VkBotLongPoll, VkBotEventType
 IMAGE_PATH = "./images/test.png"
 # IMAGE_PATH = "/Users/ash/Desktop/test.png"  # DEBUGGING EMPTY PICTURE
 
-CONNECTION = psycopg2.connect(user="newuser",
-                                  password="password",
-                                  host="localhost",
-                                  port="5432",
-                                  database="hashes")
+def reconnect():
+    CONNECTION = psycopg2.connect(user="newuser",
+                                    password="password",
+                                    host="localhost",
+                                    port="5432",
+                                    database="hashes")
+    return CONNECTION
 
 
 class Kitty_Bot:
@@ -58,7 +60,7 @@ class Kitty_Bot:
         dictionary.close()
 
         print("Bot is ACTIVE --- ", end="")
-    
+
     def __del__(self):
         print("Bot is STOPPED")
 
@@ -69,16 +71,16 @@ class Kitty_Bot:
 
     def send_message(self, id, message):
         self.vk_session.method('messages.send', {'chat_id':id, 'message':message, 'random_id':get_random_id()})
-    
+
     def find_picture(self):
         old_files = glob.glob("./images/*")  # Clean directory for a new pic
         for file in old_files:
             os.remove(file)
 
-        current_source = self.cute_cats_url[random.randint(0, len(self.cute_cats_url)-1)] 
+        current_source = self.cute_cats_url[random.randint(0, len(self.cute_cats_url)-1)]
         getURL = requests.get(current_source, headers={"User-Agent":"Mozilla/5.0"})  # Scrape url for pics
         soup = BeautifulSoup(getURL.text, 'html.parser')
-        
+
         images = soup.find_all('img')
         resolvedURLs = []
 
@@ -104,11 +106,14 @@ class Kitty_Bot:
 
 def main_bot_loop():
     try:
-        cursor = CONNECTION.cursor()  # Connecting to the database
-
+        try:
+            cursor = CONNECTION.cursor()  # Connecting to the database
+        except:
+            CONNECTION = reconnect()
+            cursor = CONNECTION.cursor()
         bot = Kitty_Bot()
         print(main_bot_loop.__name__)
-        
+
         for event in bot.longpoll.listen():
             if event.type == VkBotEventType.MESSAGE_NEW:
                 if event.from_chat:
@@ -122,7 +127,7 @@ def main_bot_loop():
                             bot.find_picture()
                         while orig.search_for_duplicate(orig.get_image_hash(IMAGE_PATH), cursor) == None: # Preventing duplicate images from being sent
                             bot.find_picture()
-                        bot.send_picture(id, bot.manual_responses) 
+                        bot.send_picture(id, bot.manual_responses)
                         CONNECTION.commit()
 
     except KeyboardInterrupt:
@@ -139,7 +144,7 @@ def get_time() -> list:
     print("")
     return lucky_times
 
-def autonomous_bot_loop():  
+def autonomous_bot_loop():
     times = get_time()
     bot = Kitty_Bot()
     print(autonomous_bot_loop.__name__)
@@ -149,13 +154,17 @@ def autonomous_bot_loop():
         for thing in times:
             if currentTime[0] == thing[0] and currentTime[1] == thing[1]:
                 id = 2  # TODO For every chat - do a post based on the id (or just tie it to one single chat which is a shitty idea)
-                cursor = CONNECTION.cursor()
+                try:
+                    cursor = CONNECTION.cursor()  # Connecting to the database
+                except:
+                    CONNECTION = reconnect()
+                    cursor = CONNECTION.cursor()
                 bot.find_picture()
                 while os.stat(IMAGE_PATH).st_size < 1000:  # Preventing empty images from being sent (empty size usually is 919 bytes but further research is needed)
                     bot.find_picture()
                 while orig.search_for_duplicate(orig.get_image_hash(IMAGE_PATH), cursor) == None: # Preventing duplicate images from being sent
                     bot.find_picture()
-                bot.send_picture(id, bot.auto_responses) 
+                bot.send_picture(id, bot.auto_responses)
                 CONNECTION.commit()
                 times.pop(0)  # Delete the first element from array (pop da stack) TODO - maybe use a stack instead of the list
         if currentTime[0] == 9 and currentTime[1] == 0:
@@ -164,6 +173,8 @@ def autonomous_bot_loop():
 
 
 if __name__ == "__main__":
+    CONNECTION = reconnect()
+
     proc_list = []
     request_loop = mps.Process(target=main_bot_loop)
     auto_loop = mps.Process(target=autonomous_bot_loop)
@@ -173,4 +184,3 @@ if __name__ == "__main__":
     auto_loop.start()
     request_loop.join()
     auto_loop.join()
-    
