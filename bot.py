@@ -17,7 +17,7 @@ IMAGE_PATH = "./images/test.png"
 # IMAGE_PATH = "/Users/ash/Desktop/test.png"  # DEBUGGING EMPTY PICTURE
 
 def reconnect():
-    CONNECTION = psycopg2.connect(user="newuser",
+    CONNECTION = psycopg2.connect(user="hashes",
                                     password="password",
                                     host="localhost",
                                     port="5432",
